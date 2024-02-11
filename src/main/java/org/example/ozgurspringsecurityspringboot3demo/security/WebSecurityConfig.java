@@ -1,6 +1,7 @@
 package org.example.ozgurspringsecurityspringboot3demo.security;
 
 import lombok.RequiredArgsConstructor;
+import org.example.ozgurspringsecurityspringboot3demo.service.UserDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,7 +21,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomUserDetailService customUserDetailService;
+    private final UserDetailService userDetailService;
     private final UnauthorisedHandler unauthorisedHandler;
 
     @Bean
@@ -37,7 +38,9 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(registry -> registry
                         .requestMatchers("/").permitAll()// root path is permitted to everyone
                         .requestMatchers("/auth/login").permitAll() // login path is permitted to everyone
+                        .requestMatchers("/auth/crete-user").permitAll() // login path is permitted to everyone
                         .requestMatchers("/admin/**").hasRole("ADMIN") // admin path is permitted to only users with role ADMIN
+                        .requestMatchers("/secured/**").hasRole("USER") // admin path is permitted to only users with role ADMIN
                         .anyRequest().authenticated() // all other requests are authenticated
                 );
 
@@ -53,7 +56,7 @@ public class WebSecurityConfig {
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         var builder = http.getSharedObject(AuthenticationManagerBuilder.class);
         builder
-                .userDetailsService(customUserDetailService)
+                .userDetailsService(userDetailService)
                 .passwordEncoder(passwordEncoder());
         return builder.build();
     }

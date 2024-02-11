@@ -1,27 +1,25 @@
-package org.example.ozgurspringsecurityspringboot3demo.security;
+package org.example.ozgurspringsecurityspringboot3demo.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.ozgurspringsecurityspringboot3demo.service.UserService;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.example.ozgurspringsecurityspringboot3demo.entity.UserRepository;
+import org.example.ozgurspringsecurityspringboot3demo.security.UserPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
-public class CustomUserDetailService implements UserDetailsService {
-    private final UserService userService;
+public class UserDetailService implements UserDetailsService {
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {//UserDetails in the UserPrincipal the same
-        var user = userService.findByEmail(username).orElseThrow();
+        var user = userRepository.findByEmail(username).orElseThrow();
         return UserPrincipal.builder()
                 .userId(user.getId())
                 .email(user.getEmail())
-                .authorities(List.of(new SimpleGrantedAuthority(user.getRole())))
+                .authorities(user.getAuthorities())
                 .password(user.getPassword())
                 .build();
     }
